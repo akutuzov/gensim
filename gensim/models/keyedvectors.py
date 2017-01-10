@@ -12,13 +12,12 @@ except ImportError:
 # If pyemd is attempted to be used, but isn't installed, ImportError will be raised in wmdistance
 try:
     from pyemd import emd
-
     PYEMD_EXT = True
 except ImportError:
     PYEMD_EXT = False
 
-from numpy import exp, log, dot, zeros, outer, random, dtype, float32 as REAL, \
-    double, uint32, seterr, array, uint8, vstack, fromstring, sqrt, newaxis, \
+from numpy import exp, log, dot, zeros, outer, random, dtype, float32 as REAL,\
+    double, uint32, seterr, array, uint8, vstack, fromstring, sqrt, newaxis,\
     ndarray, empty, sum as np_sum, prod, ones, ascontiguousarray
 
 from gensim import utils, matutils  # utility fnc for pickling, common scipy operations etc
@@ -26,6 +25,7 @@ from gensim.corpora.dictionary import Dictionary
 from six import string_types
 from six.moves import xrange
 from scipy import stats
+
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +35,6 @@ class KeyedVectors(utils.SaveLoad):
     Class to contain vectors and vocab for the Word2Vec training class and other w2v methods not directly
     involved in training such as most_similar()
     """
-
     def __init__(self):
         self.syn0 = []
         self.syn0norm = None
@@ -80,11 +79,11 @@ class KeyedVectors(utils.SaveLoad):
         positive = [
             (word, 1.0) if isinstance(word, string_types + (ndarray,)) else word
             for word in positive
-            ]
+        ]
         negative = [
             (word, -1.0) if isinstance(word, string_types + (ndarray,)) else word
             for word in negative
-            ]
+        ]
 
         # compute the weighted average of all words
         all_words, mean = set(), []
@@ -181,7 +180,7 @@ class KeyedVectors(utils.SaveLoad):
                 if not t1 in docset1 or not t2 in docset2:
                     continue
                 # Compute Euclidean distance between word vectors.
-                distance_matrix[i, j] = sqrt(np_sum((self[t1] - self[t2]) ** 2))
+                distance_matrix[i, j] = sqrt(np_sum((self[t1] - self[t2])**2))
 
         if np_sum(distance_matrix) == 0.0:
             # `emd` gets stuck if the distance matrix contains only zeros.
@@ -384,7 +383,7 @@ class KeyedVectors(utils.SaveLoad):
           True
 
         """
-        if not (len(ws1) and len(ws2)):
+        if not(len(ws1) and len(ws2)):
             raise ZeroDivisionError('Atleast one of the passed list is empty.')
         v1 = [self[word] for word in ws1]
         v2 = [self[word] for word in ws2]
@@ -482,16 +481,15 @@ class KeyedVectors(utils.SaveLoad):
 
     @staticmethod
     def log_evaluate_word_pairs(pearson, spearman, oov, pairs):
-        logger.info('Pearson correlation coefficient against %s: %.4f', pairs, pearson[0])
-        logger.info('Spearman rank-order correlation coefficient against %s: %.4f', pairs, spearman[0])
-        logger.info('Pairs with unknown words ratio: %.1f%%', oov)
+        logger.info('Pearson correlation coefficient against %s: %.4f' % (pairs, pearson[0]))
+        logger.info('Spearman rank-order correlation coefficient against %s: %.4f' % (pairs, spearman[0]))
+        logger.info('Pairs with unknown words ratio: %.1f%%' % oov)
 
-    def evaluate_word_pairs(self, pairs, delimiter='\t', restrict_vocab=300000, case_insensitive=True,
-                            dummy4unknown=False):
+    def evaluate_word_pairs(self, pairs, delimiter='\t', restrict_vocab=300000, case_insensitive=True, dummy4unknown=False):
         """
         Compute correlation of the model with human similarity judgments. `pairs` is a filename of a dataset where
         lines are 3-tuples, each consisting of a word pair and a similarity value, separated by `delimiter'.
-        An example dataset is included in Gensim (test/test_data/wordsim353.tsv). More datasets can be found at
+        An example dataset is included in Gensim (test/test_data/wordsim353.tsv). More datasets can be found at 
         http://technion.ac.il/~ira.leviant/MultilingualVSMdata.html or https://www.cl.cam.ac.uk/~fh295/simlex.html.
 
         The model is evaluated using Pearson correlation coefficient and Spearman rank-order correlation coefficient
@@ -534,7 +532,7 @@ class KeyedVectors(utils.SaveLoad):
                         a, b, sim = [word for word in line.split(delimiter)]
                     sim = float(sim)
                 except:
-                    logger.info('skipping invalid line #%d in %s', line_no, pairs)
+                    logger.info('skipping invalid line #%d in %s' % (line_no, pairs))
                     continue
                 if a not in ok_vocab or b not in ok_vocab:
                     oov += 1
@@ -543,7 +541,7 @@ class KeyedVectors(utils.SaveLoad):
                         similarity_gold.append(sim)
                         continue
                     else:
-                        logger.debug('skipping line #%d with OOV words: %s', line_no, line.strip())
+                        logger.debug('skipping line #%d with OOV words: %s' % (line_no, line.strip()))
                         continue
                 similarity_gold.append(sim)  # Similarity from the dataset
                 similarity_model.append(self.similarity(a, b))  # Similarity from the model
@@ -552,17 +550,14 @@ class KeyedVectors(utils.SaveLoad):
         pearson = stats.pearsonr(similarity_gold, similarity_model)
         oov_ratio = float(oov) / (len(similarity_gold) + oov) * 100
 
-        logger.debug(
-                    'Pearson correlation coefficient against %s: %f with p-value %f',
-                    pairs, pearson[0], pearson[1]
-                    )
-        logger.debug(
-                    'Spearman rank-order correlation coefficient against %s: %f with p-value %f',
-                    pairs, spearman[0], spearman[1]
-                    )
-        logger.debug('Pairs with unknown words: %d', oov)
+        logger.debug('Pearson correlation coefficient against %s: %f with p-value %f'
+                     % (pairs, pearson[0], pearson[1]))
+        logger.debug('Spearman rank-order correlation coefficient against %s: %f with p-value %f'
+                     % (pairs, spearman[0], spearman[1]))
+        logger.debug('Pairs with unknown words: %d' % oov)
         self.log_evaluate_word_pairs(pearson, spearman, oov_ratio, pairs)
         return pearson, spearman, oov_ratio
+
 
     def init_sims(self, replace=False):
         """
